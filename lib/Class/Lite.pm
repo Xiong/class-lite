@@ -51,6 +51,7 @@ sub init {
 #   @
 #   
 sub import {
+    no warnings 'uninitialized';
     return unless shift eq q{Class::Lite};
     my $caller      = caller;
     my $bridge      = qq{Class::Lite::$caller};
