@@ -80,10 +80,6 @@ sub import {
     return 1;    
 }; ## import
 
-
-
-
-
 ## END MODULE
 1;
 #============================================================================#
@@ -222,6 +218,22 @@ This module is installed using L<< Module::Build|Module::Build >>.
 =head1 DIAGNOSTICS
 
 =over
+
+=item C<< Invalid accessor name... >>
+
+You passed something horrible on the use-line. Valid arguments to 
+C<< import >> need to be valid Perl identifiers. If you have in your class 
+some C<< '-$/' >> attribute (which is a valid hash key) then you'll have to 
+write your own accessors for it. You won't be able to call them, for example, 
+C<< get_-$/() >>.
+
+=item C<< Failed to generate (package) >>
+
+Something evil happened while doing the heavy lifting: getting into your package, getting into the bridge package, setting up the ISA relationships, or defining requested accessors. This should never happen and isn't your fault. Please make a bug report. 
+
+=item C<< some error message >>
+
+Some explanation. 
 
 =item C<< some error message >>
 
