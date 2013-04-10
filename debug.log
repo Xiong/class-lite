@@ -1,0 +1,18 @@
+
+### @_: [
+###       'Acme::Teddy',
+###       'foo',
+###       'bar',
+###       'baz'
+###     ]
+
+### @_: [
+###       'foo',
+###       'bar',
+###       'baz'
+###     ]
+### @Acme::Teddy::Bear::IMPORTS: [
+###                                'foo',
+###                                'bar',
+###                                'baz'
+###                              ]
