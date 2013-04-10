@@ -15,7 +15,28 @@ eval q{
 
 $eval_err       = $@;
 $want           = qr/Invalid accessor name/;
-$check          = 'Invalid accessor name';
+$check          = 'Invalid accessor name (ho-ge)';
+like( $eval_err, $want, $check );
+
+eval q{
+    package Acme::Teddy::Bear;
+    use Class::Lite ( 'attr1', '', 'attr3' );
+};
+
+$eval_err       = $@;
+$want           = qr/Invalid accessor name/;
+$check          = 'Invalid accessor name (empty string)';
+like( $eval_err, $want, $check );
+
+eval q{
+    package Acme::Teddy::Bird;
+    my $wing    = [];
+    use Class::Lite ( 'attr1', $wing, 'attr3' );
+};
+
+$eval_err       = $@;
+$want           = qr/Invalid accessor name/;
+$check          = 'Invalid accessor name (aryref)';
 like( $eval_err, $want, $check );
 
 
