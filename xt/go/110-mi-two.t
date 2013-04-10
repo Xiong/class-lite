@@ -11,6 +11,7 @@ my $check       ;
 {
     package Acme::Teddy;
     use Class::Lite qw| attr1 attr2 attr3 |;
+    sub get_attr3 { return 'FAIL' };
 }
 
 eval {
