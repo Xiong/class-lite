@@ -21,7 +21,6 @@ use File::Spec::Functions qw(
     canonpath
 );
 use Cwd;
-use Data::Lock qw( dlock dunlock );     # Lock variables
 use Getopt::Long;                       # Process command line options
 Getopt::Long::Configure ("bundling");   # enable, for instance, -xyz
 use Pod::Usage;                         # Build help text from POD
@@ -40,11 +39,10 @@ use List::MoreUtils qw( any );          # The stuff missing in List::Util
 #~ use Devel::Comments '###', '#####';
 
 #=========# Pseudo-globals
-
 # Constants
 
 # for Getopt::Long; also used to construct %dispatch table
-dlock( my @getopt_setup     = qw(
+my @getopt_setup     = qw(
     h+
     usage|use
     help
@@ -53,14 +51,14 @@ dlock( my @getopt_setup     = qw(
     n|dryrun
     v|verbose+
     b|bump=s
-));
+);
 #    testrequired=i
 #    testoptional:s
 #    testnegatable!
 
-dlock( my $do_prefix    = q{_do_}       );  # internal; subroutine prefix
-dlock( my $ignore_file  = q{.bumpskip}  );  # items to skip in bumping           
-dlock( my $di           = q{ } x 4      );  # indent diff lines by this much
+my $do_prefix    = q{_do_};         # internal; subroutine prefix
+my $ignore_file  = q{.bumpskip};    # items to skip in bumping           
+my $di           = q{ } x 4;        # indent diff lines by this much
 
 # Variables
 
@@ -69,7 +67,7 @@ my %options         ;               # will be filled by GetOptions()
 my @dispatch_setup  ;               # options processed in this order
 my $dispatch        ;               # key is option; value is coderef
 my $write_files     = 1;            # if false, don't write any file
-#~ dlock(my $write_files = 0);         # locked off during development
+#~ my $write_files     = 0;            # locked off during development
 my $verbosity       = 0;            # verbosity level 1=some, 2=more
 my $bump            ;               # new version; specify as string
 my $ignore_regex    ;               # giant regex of alternates
