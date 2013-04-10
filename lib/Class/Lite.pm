@@ -11,20 +11,76 @@ use strict;
 use warnings;
 use version; our $VERSION = qv('v0.0.0');
 
-# Core modules
-
-# CPAN modules
-
 # Alternate uses
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
 #============================================================================#
 
-# Pseudo-globals
+#=========# CLASS METHOD
+#~ my $self    = My::Class->new(@_);
+#
+#   Classic hashref-based-object constructor.
+#   Passes any arguments to init().
+#   
+sub new {
+    my $class   = shift;
+    my $self    = {};
+    bless ( $self => $class );
+    $self->init(@_);
+    return $self;
+}; ## new
 
-## pseudo-globals
-#----------------------------------------------------------------------------#
+#=========# OBJECT METHOD
+#~ $self->init(@_);
+#
+#   Abstract method does nothing. Override in your class.
+#   
+sub init {
+    return shift;
+}; ## init
+
+#=========# EXTERNAL FUNCTION
+#~ use Class::Lite qw| attr1 attr2 attr3 |;
+#~ use Class::Lite qw|             # Simple base class with get/put accessors
+#~     attr1
+#~     attr2
+#~     attr3
+#~ |;
+#
+#   @
+#   
+sub import {
+    return unless shift eq q{Class::Lite};
+    my $caller      = caller;
+    my $bridge      = qq{Class::Lite::$caller};
+    
+    # Do most work in the bridge class.    
+    eval join qq{\n},
+        qq* package $bridge;                                            *,
+        qq* our  \@ISA;                                                 *,
+        qq* push \@ISA, 'Class::Lite';                                  *,
+        map {
+            defined and ! ref and /^[^\W\d]\w*\z/s
+                or die "Invalid accessor name '$_'";
+              qq* sub get_$_ { return \$_[0]->{$_} };                   *
+            . qq* sub put_$_ { \$_[0]->{$_} = \$_[1]; return \$_[0] };  *
+        } @_,
+    ;
+    die "Failed to generate $bridge: $@" if $@;
+    
+    # Make caller inherit from bridge.
+    eval join qq{\n},
+        qq* package $caller;                                            *,
+        qq* our  \@ISA;                                                 *,
+        qq* push \@ISA, '$bridge';                                      *,
+    ;
+    die "Failed to generate $caller: $@" if $@;
+    
+    return 1;    
+}; ## import
+
+
 
 
 
@@ -35,7 +91,7 @@ __END__
 
 =head1 NAME
 
-Class::Lite - simple base class with get/put accessor generation
+Class::Lite - Simple base class with get/put accessors
 
 =head1 VERSION
 
@@ -102,15 +158,21 @@ I have long defined C<< init() >> as a shortcut method to fill up a new
 object; but this is a blatant violation of encapsulation, no matter who 
 does it. No more. 
 
+If accessors are defined in your calling package then you will raise a 
+warning if you attempt to redefine them; if they are defined in 
+C<< Class::Lite >> itself then they will be available to all that inherit 
+from it. So your accessors are defined in an intermediate package 
+generated at compile-time. 
+
 =head1 USE-LINE
 
     package Toy::Class;
     use Class::Lite qw| foo bar baz |;              # make get/put accessors
     use Class::Lite;                                # no accessors
 
-Makes C<< Class::Lite >> a base class for Toy::Class, pushing onto 
-C<< @ISA >>. If arguments are given then simple get and put accessors will be 
-created in caller's namespace for each argument. 
+Makes C<< Class::Lite >> a base class for Toy::Class. If arguments are 
+given then simple get and put accessors will be created in caller's 
+namespace for each argument. 
 
 =head1 CLASS METHOD 
 
@@ -119,7 +181,7 @@ created in caller's namespace for each argument.
     my $obj = Class::Lite->new(@_);
 
 Blesses an anonymous hash reference into the given class 
-which inherits from Class::Lite. Passes all its args to init().
+which inherits from Class::Lite. Passes all its args to init(). 
 
 =head1 OBJECT METHOD 
 
