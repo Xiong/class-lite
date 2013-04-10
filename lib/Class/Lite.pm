@@ -43,33 +43,115 @@ This document describes Class::Lite version v0.0.0
 
 =head1 SYNOPSIS
 
-    use Class::Lite;
+    package Toy::Class;
+    use Class::Lite qw| foo bar baz |;              # make get/put accessors
+    
+    package Any::Class;
+    use Toy::Class;
+    my $toy     = Toy::Class->new;
+    $toy->init(@_);                                 # does nothing; override
+    $toy->put_foo(42);
+    my $answer  = $toy->get_foo;
+    
+    use Class::Lite;                                # no accessors
 
 =head1 DESCRIPTION
 
 =over
 
-I<< Anyone can tell the truth,  >> 
-I<< but only very few of us can make epigrams. >> 
--- W. Somerset Maugham
+I<< Nature's great masterpiece, an elephant, 
+The only harmless great thing.  >> 
+-- John Donne
 
 =back
 
-=head1 METHODS 
+The hashref-based base class that does no more than it must. Your 
+constructor and accessors are defined in a generated package so you can 
+override them easily. 
+
+=head1 Why?
+
+Computer programmers are clever people who delight in evading restrictions.
+Create an L<< inside-out|Class::Std >> (flyweight) class to enforce 
+encapsulation and another fellow will L<< hack in|PadWalker >>. The only 
+way to win the ancient game of locksmith and lockpick is never to begin. 
+If someone misuses your class then it's not your responsibility. 
+Hashref-based objects are traditional, well-understood, even expected in 
+the Perl world; tools exist with which to work with them. 
+
+Similarly, C<< Class::Lite >> provides no read-only accessors. If your client 
+developer wants to alter an attribute he will; you may as well provide a 
+method for the purpose. You might warn against the practice by overriding 
+the default method: 
+
+    sub put_foo {
+        warn q{Please don't write to the 'foo' attribute.};
+        my $self    = shift;
+        return $self->SUPER::put_foo(@_);
+    };
+
+B<< set >> is too similar to B<< get >> in one way, not enough in another. 
+Also B<< set >> is one of those heavily overloaded words, like "love" or 
+"data", that I prefer to avoid using at all. I say B<< put >> is equally 
+short, clearer in intent, not easily misread for B<< get >>; and the first 
+character's descender points in the opposite direction.
+
+I belong to the school that eschews single-method "mutator" accessors. 
+
+I have long defined C<< init() >> as a shortcut method to fill up a new 
+object; but this is a blatant violation of encapsulation, no matter who 
+does it. No more. 
+
+=head1 USE-LINE
+
+    package Toy::Class;
+    use Class::Lite qw| foo bar baz |;              # make get/put accessors
+    use Class::Lite;                                # no accessors
+
+Makes C<< Class::Lite >> a base class for Toy::Class, pushing onto 
+C<< @ISA >>. If arguments are given then simple get and put accessors will be 
+created in caller's namespace for each argument. 
+
+=head1 CLASS METHOD 
 
 =head2 new()
 
-=head1 ACCSESSORS
+    my $obj = Class::Lite->new(@_);
 
-Object-oriented accessor methods are provided for each parameter and result. 
-They all do just what you'd expect. 
+Blesses an anonymous hash reference into the given class 
+which inherits from Class::Lite. Passes all its args to init().
 
-    $self               = $self->put_attr($string);
-    $string             = $self->get_attr();
+=head1 OBJECT METHOD 
+
+=head2 init()
+
+    my $obj = $old->init(@_);
+
+This abstract method does nothing at all and returns its object. 
+You may wish to override it in your class. 
+
+=head1 INHERITED FUNCTION 
+
+    import(@_);
+
+Called by use() as usual and does all the work. If called from any class 
+other than Class::Lite, returns without doing anything. 
+
+Since this is merely inherited you may define your own import() with impunity.
+
+=head1 GENERATED METHODS 
+
+Accessor methods are generated for each argument on the use-line. 
+They all do just what you'd expect. No type checking is done. 
+
+    $self   = $self->put_attr($foo);
+    $foo    = $self->get_attr;
+
+Put accessors return the object. Get accessors discard any arguments.
 
 =head1 SEE ALSO
 
-L<< Some::Module|Some::Module >>
+L<< Object::Tiny|Object::Tiny >>
 
 =head1 INSTALLATION
 
@@ -128,16 +210,17 @@ None known.
 This is an early release. Reports and suggestions will be warmly welcomed. 
 
 Please report any issues to: 
-L<https://github.com/Xiong/devel-toolbox/issues>.
+L<< https://github.com/Xiong/class-lite/issues >>.
 
 =head1 DEVELOPMENT
 
 This project is hosted on GitHub at: 
-L<https://github.com/Xiong/devel-toolbox>. 
+L<< https://github.com/Xiong/class-lite >>. 
 
 =head1 THANKS
 
-Somebody helped!
+Adam Kennedy (ADAMK) for L<< Object::Tiny|Object::Tiny >>,  on which much of 
+this module's code is based. 
 
 =head1 AUTHOR
 
@@ -150,18 +233,7 @@ Xiong Changnian C<< <xiong@cpan.org> >>
 
 This library and its contents are released under Artistic License 2.0:
 
-L<http://www.opensource.org/licenses/artistic-license-2.0.php>
-
-=begin fool_pod_coverage
-
-No, I'm not just lazy. I think it's counterproductive to give each accessor 
-its very own section. Sorry if you disagree. 
-
-=head2 put_attr
-
-=head2 get_attr
-
-=end   fool_pod_coverage
+L<< http://www.opensource.org/licenses/artistic-license-2.0.php >>
 
 =cut
 

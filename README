@@ -1,21 +1,10 @@
 Class-Lite version v0.0.0
 
-J'avais cru plus difficile de mourir. 
-        -- Louis XIV
+Nature's great masterpiece, an elephant, 
+The only harmless great thing.
+-- John Donne
 
-Die early, die often. Make frequent sanity checks and die when a check fails. 
-See neat dumps of the caller stack with each error. Construct a group of 
-error messages in one object or write error text ad hoc. Trap an error 
-object and examine the contents; or let it tell its sad tale and end it. 
-
-Error::Base usage can be simple or complex. For quick sanity checks, 
-construct and throw a simple fatal error in one line. At the other extreme, 
-you can override methods in your own error subclasses. 
-
-Error::Base is lightweight. It defines no global variables, uses no non-core 
-modules (and few of those), exports no symbols, and is purely object-oriented.
-I hope you will be able to use it commonly instead of a simple die(). 
-You are not required to subclass it. 
+The hashref-based base class that does no more than it must. 
 
 INSTALLATION
 
@@ -35,7 +24,7 @@ some core modules if your perl is old.
 
 LICENSE
 
-Copyright (C) 2011, 2013 Xiong Changnian <xiong@cpan.org>
+Copyright (C) 2013 Xiong Changnian <xiong@cpan.org>
 
 This library and its contents are released under Artistic License 2.0:
 
