@@ -223,10 +223,12 @@ This module is installed using L<< Module::Build|Module::Build >>.
 =item C<< Invalid accessor name... >>
 
 You passed something horrible on the use-line. Valid arguments to 
-C<< import >> need to be valid Perl identifiers. If you have in your class 
-some C<< '-$/' >> attribute (which is a valid hash key) then you'll have to 
-write your own accessors for it. You won't be able to call them, for example, 
-C<< get_-$/() >>.
+C<< import >> need to be quoted strings and valid Perl identifiers. If you 
+have in your class some C<< '-$/' >> attribute (which is a valid hash key) 
+then you'll have to write your own accessors for it. You won't be able to 
+call them, for example, C<< get_-$/() >>. 
+
+This error will attempt to display the offending argument but may not succeed.
 
 =item C<< Failed to generate (package) >>
 
