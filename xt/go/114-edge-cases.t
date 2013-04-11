@@ -11,8 +11,10 @@ my $check       ;
 
 # Construction
 eval {
-    package Acme::Teddy;
-    use Class::Lite qw| attr1 attr2 attr3 |;
+    BEGIN {
+        package Acme::Teddy;
+        use Class::Lite qw| attr1 attr2 attr3 |;
+    }
 };
 $eval_err       = $@;
 
@@ -53,7 +55,7 @@ BEGIN {
         ### @Acme::Teddy::Cub::IMPORTS
     };
 }
-{
+BEGIN {
     package Acme::Teddy::Cub;
     use Acme::Teddy qw| foo bar baz |;
 }
@@ -64,7 +66,7 @@ $have           = \@Acme::Teddy::Cub::IMPORTS;
 $want           = [qw| foo bar baz |];
 is_deeply( $have, $want, $check );
 
-
+### %INC
 exit 0;
 
 my $self;   # DUMMY
