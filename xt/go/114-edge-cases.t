@@ -2,7 +2,7 @@ use strict;
 use warnings;
 use Test::More;
 
-#~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
+use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 my $eval_err    ;
 my $have        ;
@@ -19,28 +19,28 @@ $eval_err       = $@;
 $check          = $eval_err ? $eval_err : 'use ok';
 ok( ! $eval_err, $check );
 
-$check          = 'wrongly import/subclass';
-# Acme::Teddy inherited import() but that method short-circuits 
-#   when called by ::Bear on the use-line. 
-# So no ISA relationship is set, ::Bear does not inherit new(), 
-#   and use-line args are discarded.
-{
-    package Acme::Teddy::Bear;
-    use Acme::Teddy qw| foo bar baz |;
-}
-pass( $check );
-
-$check          = 'new in wrongly import/subclass';
-eval {
-    my $self        = Acme::Teddy::Bear->new;
-};
-$eval_err       = $@;
-$want           = qr/Can't locate object method/;
-like( $eval_err, $want, $check );
+#~ $check          = 'wrongly import/subclass';
+#~ # Acme::Teddy inherited import() but that method short-circuits 
+#~ #   when called by ::Bear on the use-line. 
+#~ # So no ISA relationship is set, ::Bear does not inherit new(), 
+#~ #   and use-line args are discarded.
+#~ {
+#~     package Acme::Teddy::Bear;
+#~     use Acme::Teddy qw| foo bar baz |;
+#~ }
+#~ pass( $check );
+#~ 
+#~ $check          = 'new in wrongly import/subclass';
+#~ eval {
+#~     my $self        = Acme::Teddy::Bear->new;
+#~ };
+#~ $eval_err       = $@;
+#~ $want           = qr/Can't locate object method/;
+#~ like( $eval_err, $want, $check );
 
 $check          = 'rightly import';
 #
-{
+BEGIN {
     package Acme::Teddy;
     sub import {
         ### @_
@@ -50,17 +50,17 @@ $check          = 'rightly import';
         no strict 'refs';
         push @{"${caller}::$imsym"}, @_;
         ### @_
-        ### @Acme::Teddy::Bear::IMPORTS
+        ### @Acme::Teddy::Cub::IMPORTS
     };
 }
 {
-    package Acme::Teddy::Bear;
+    package Acme::Teddy::Cub;
     use Acme::Teddy qw| foo bar baz |;
 }
 pass( $check );
 
 $check          = 'rightly import show imports';
-$have           = \@Acme::Teddy::Bear::IMPORTS;
+$have           = \@Acme::Teddy::Cub::IMPORTS;
 $want           = [qw| foo bar baz |];
 is_deeply( $have, $want, $check );
 
