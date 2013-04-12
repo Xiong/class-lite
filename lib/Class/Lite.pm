@@ -9,7 +9,7 @@ package Class::Lite;
 #~ use 5.016002;   # 5.16.2    # 2012  # __SUB__
 use strict;
 use warnings;
-use version; our $VERSION = qv('v0.0.0');
+use version; our $VERSION = qv('v0.0.1');
 
 # Alternate uses
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
@@ -51,6 +51,7 @@ sub init {
 #   @
 #   
 sub import {
+    no warnings 'uninitialized';
     return unless shift eq q{Class::Lite};
     my $caller      = caller;
     my $bridge      = qq{Class::Lite::$caller};
@@ -91,7 +92,7 @@ Class::Lite - Simple base class with get/put accessors
 
 =head1 VERSION
 
-This document describes Class::Lite version v0.0.0
+This document describes Class::Lite version v0.0.1
 
 =head1 SYNOPSIS
 
@@ -222,10 +223,12 @@ This module is installed using L<< Module::Build|Module::Build >>.
 =item C<< Invalid accessor name... >>
 
 You passed something horrible on the use-line. Valid arguments to 
-C<< import >> need to be valid Perl identifiers. If you have in your class 
-some C<< '-$/' >> attribute (which is a valid hash key) then you'll have to 
-write your own accessors for it. You won't be able to call them, for example, 
-C<< get_-$/() >>.
+C<< import >> need to be quoted strings and valid Perl identifiers. If you 
+have in your class some C<< '-$/' >> attribute (which is a valid hash key) 
+then you'll have to write your own accessors for it. You won't be able to 
+call them, for example, C<< get_-$/() >>. 
+
+This error will attempt to display the offending argument but may not succeed.
 
 =item C<< Failed to generate (package) >>
 

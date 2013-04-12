@@ -1,6 +1,7 @@
 use strict;
 use warnings;
 use Test::More;
+use Module::Empty;              # Truly empty module ships with Class::Lite
 
 my $eval_err    ;
 my $have        ;
@@ -9,7 +10,7 @@ my $check       ;
 
 # Construction
 eval {
-    package Acme::Teddy;
+    package Module::Empty;
     use Class::Lite qw| attr1 attr2 attr3 |;
 };
 
@@ -19,9 +20,9 @@ $check          = $eval_err ? $eval_err : 'use ok';
 ok( ! $eval_err, $check );
 
 $check          = 'new';
-my $self        = Acme::Teddy->new;
+my $self        = Module::Empty->new;
 $have           = ref $self;
-$want           = 'Acme::Teddy';
+$want           = 'Module::Empty';
 is( $have, $want, $check );
 
 $check          = 'isa Class::Lite';
@@ -29,7 +30,7 @@ $have           = $self->isa('Class::Lite');
 ok( $have, $check );
 
 $check          = 'isa bridge';
-$have           = $self->isa('Class::Lite::Acme::Teddy');
+$have           = $self->isa('Class::Lite::Module::Empty');
 ok( $have, $check );
 
 # Access

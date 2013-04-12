@@ -9,15 +9,15 @@ my $check       ;
 
 # Construction
 {
-    package Acme::Teddy;
+    package Module::Empty;
     use Class::Lite qw| attr1 attr2 attr3 |;
     sub get_attr3 { return 'FAIL' };
 }
 
 eval {
-    package Acme::Teddy::Bear;
+    package Module::Empty::Bear;
     use Class::Lite qw| attr1 attr2 attr3 |;
-    use parent 'Acme::Teddy';
+    use parent 'Module::Empty';
 };
 
 $eval_err       = $@;
@@ -26,9 +26,9 @@ $check          = $eval_err ? $eval_err : 'use ok';
 ok( ! $eval_err, $check );
 
 $check          = 'new';
-my $self        = Acme::Teddy::Bear->new;
+my $self        = Module::Empty::Bear->new;
 $have           = ref $self;
-$want           = 'Acme::Teddy::Bear';
+$want           = 'Module::Empty::Bear';
 is( $have, $want, $check );
 
 $check          = 'isa Class::Lite';
@@ -36,11 +36,11 @@ $have           = $self->isa('Class::Lite');
 ok( $have, $check );
 
 $check          = 'isa bridge';
-$have           = $self->isa('Class::Lite::Acme::Teddy::Bear');
+$have           = $self->isa('Class::Lite::Module::Empty::Bear');
 ok( $have, $check );
 
 $check          = 'isa parent';
-$have           = $self->isa('Acme::Teddy');
+$have           = $self->isa('Module::Empty');
 ok( $have, $check );
 
 # Access

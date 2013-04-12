@@ -13,33 +13,21 @@ eval {
     use Class::Lite qw| attr1 attr2 attr3 |;
 };
 
-{
-    package Module::Empty::Bear;
-    use parent 'Module::Empty';
-}
-
 $eval_err       = $@;
 
 $check          = $eval_err ? $eval_err : 'use ok';
 ok( ! $eval_err, $check );
 
 $check          = 'new';
-my $self        = Module::Empty::Bear->new;
+my $self        = Module::Empty->new;
 $have           = ref $self;
-$want           = 'Module::Empty::Bear';
+$want           = 'Module::Empty';
 is( $have, $want, $check );
 
-$check          = 'isa Class::Lite';
-$have           = $self->isa('Class::Lite');
-ok( $have, $check );
-
-$check          = 'isa bridge';
-$have           = $self->isa('Class::Lite::Module::Empty');
-ok( $have, $check );
-
-$check          = 'isa parent';
-$have           = $self->isa('Module::Empty');
-ok( $have, $check );
+{
+    package Module::Empty;
+    sub put_attr2 { $self->{attr2} = 'OVERRIDE' };
+}
 
 # Access
 $check          = 'put_attr1';
@@ -51,14 +39,14 @@ $check          = 'get_attr1';
 $have           = $self->get_attr1;
 is( $have, $want, $check );
 
-$check          = 'put_attr2';
+$check          = 'put_attr2 override';
 $self->put_attr2(42.5);
 $have           = $self->{attr2};
-$want           = 42.5;
-cmp_ok( $have, '==', $want, $check );
-$check          = 'get_attr2';
+$want           = 'OVERRIDE';
+cmp_ok( $have, 'eq', $want, $check );
+$check          = 'get_attr2 override';
 $have           = $self->get_attr2;
-cmp_ok( $have, '==', $want, $check );
+cmp_ok( $have, 'eq', $want, $check );
 
 $check          = 'put_attr3';
 my $bazref      = [];
