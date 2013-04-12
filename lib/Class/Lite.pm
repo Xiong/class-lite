@@ -119,7 +119,7 @@ The only harmless great thing.  >>
 =back
 
 The hashref-based base class that does no more than it must. Your 
-constructor and accessors are defined in a generated package so you can 
+constructor and accessors are defined in a bridge package so you can 
 override them easily. 
 
 =head1 Why?
@@ -149,7 +149,7 @@ Also B<< set >> is one of those heavily overloaded words, like "love" or
 short, clearer in intent, not easily misread for B<< get >>; and the first 
 character's descender points in the opposite direction.
 
-I belong to the school that eschews single-method "mutator" accessors. 
+I eschew single-method C<< foo() >> accessors. 
 
 I have long defined C<< init() >> as a shortcut method to fill up a new 
 object; but this is a blatant violation of encapsulation, no matter who 
@@ -158,7 +158,7 @@ does it. No more.
 If accessors are defined in your calling package then you will raise a 
 warning if you attempt to redefine them; if they are defined in 
 C<< Class::Lite >> itself then they will be available to all that inherit 
-from it. So your accessors are defined in an intermediate package 
+from it. So your accessors are defined in an intermediate "bridge" package 
 generated at compile-time. 
 
 =head1 USE-LINE
@@ -169,18 +169,46 @@ generated at compile-time.
 
 Makes C<< Class::Lite >> a base class for Toy::Class. If arguments are 
 given then simple get and put accessors will be created in caller's 
-namespace for each argument. 
+namespace for each argument. The accessors do no validation. 
 
-=head1 CLASS METHOD 
+=head1 INHERITED METHODS 
+
+=head2 import()
+
+    Class::Lite->import(@_);
+    A::Subclass->import(@_);
+
+Called by use() as usual and does all the work. Inherited by caller so 
+your further subclasses can also take advantage of C<< Class::Lite >> 
+features. 
+
+Since this is merely inherited you may define your own C<< import() >> with 
+impunity. If you want to have your cake and eat it, too, declare your 
+use-line API as a hashref: 
+
+    use My::Class({
+        hoge        => 'piyo',
+        accessors   => qw| chim chum choo |;
+    });
+
+Then in your class: 
+
+    sub import {
+        my $class       = shift;
+        my $args        = shift;
+        my $hoge        =    $args->{hoge}      // 'default'     ;
+        my $accessors   = @{ $args->{accessors} // []           };
+        _do_hoge{$hoge};
+        $class->SUPER::import($accessors);
+        return 1;
+    };
 
 =head2 new()
 
-    my $obj = Class::Lite->new(@_);
+    my $obj = My::Class->new(@_);
 
-Blesses an anonymous hash reference into the given class 
-which inherits from Class::Lite. Passes all its args to init(). 
-
-=head1 OBJECT METHOD 
+Blesses an anonymous hash reference into the given class which inherits 
+from C<< Class::Lite >>. Passes all its args to C<< init() >>. 
 
 =head2 init()
 
@@ -189,28 +217,43 @@ which inherits from Class::Lite. Passes all its args to init().
 This abstract method does nothing at all and returns its object. 
 You may wish to override it in your class. 
 
-=head1 INHERITED FUNCTION 
-
-    import(@_);
-
-Called by use() as usual and does all the work. If called from any class 
-other than Class::Lite, returns without doing anything. 
-
-Since this is merely inherited you may define your own import() with impunity.
-
 =head1 GENERATED METHODS 
 
 Accessor methods are generated for each argument on the use-line. 
-They all do just what you'd expect. No type checking is done. 
+They all do just what you'd expect. No validation is done. 
 
     $self   = $self->put_attr($foo);
     $foo    = $self->get_attr;
 
 Put accessors return the object. Get accessors discard any arguments.
 
+=head1 MULTIPLE INHERITANCE
+
+C<< Class::Lite::import() >> is something of a black magic method; it tinkers in caller's package, create a bridge package (in memory), defines methods. It should probably only be called by C<< use() >> or at least from within a C<< BEGIN >> block; no attempt is made to define its behavior if called otherwise. 
+
+Even at compile-time there are questions raised when your class inherits from both C<< Class::Lite >> and some other superclass: 
+
+    package My::Class;
+    use Class::Lite qw| foo bar baz |;              # make get/put accessors
+    use parent 'Big::Fat::Super';
+
+If the other superclass is pedestrian and just defines methods for you to inherit then there's little likelihood of interaction. If the other superclass is also trying to define methods with the same names as generated accessors then who can say? So don't do that. 
+
+Diamond inheritance is a special case: 
+
+    package My::Big;
+    use Class::Lite qw| big1 big2 |;
+    sub get_tot1 { 'do something utterly unpredictable'             };
+    
+    package My::Tot;
+    # I want to inherit from My::Big but I also want Class::Lite's acc's.
+    use Class::Lite qw| tot1 tot2 |;
+
+TODO: WHAT WILL HAPPEN?
+
 =head1 SEE ALSO
 
-L<< Object::Tiny|Object::Tiny >>
+L<< Object::Tiny|Object::Tiny >>, L<< Mouse|Mouse >>
 
 =head1 INSTALLATION
 
@@ -232,7 +275,10 @@ This error will attempt to display the offending argument but may not succeed.
 
 =item C<< Failed to generate (package) >>
 
-Something evil happened while doing the heavy lifting: getting into your package, getting into the bridge package, setting up the ISA relationships, or defining requested accessors. This should never happen and isn't your fault. Please make a bug report. 
+Something evil happened while doing the heavy lifting: getting into your 
+package, getting into the bridge package, setting up the ISA 
+relationships, or defining requested accessors. This should never happen 
+and isn't your fault. Please make a bug report. 
 
 =item C<< some error message >>
 
