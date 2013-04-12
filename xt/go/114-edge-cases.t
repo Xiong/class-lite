@@ -12,7 +12,7 @@ my $check       ;
 # Construction
 eval {
     BEGIN {
-        package Acme::Teddy;
+        package Module::Empty;
         use Class::Lite qw| attr1 attr2 attr3 |;
     }
 };
@@ -22,19 +22,19 @@ $check          = $eval_err ? $eval_err : 'use ok';
 ok( ! $eval_err, $check );
 
 #~ $check          = 'wrongly import/subclass';
-#~ # Acme::Teddy inherited import() but that method short-circuits 
+#~ # Module::Empty inherited import() but that method short-circuits 
 #~ #   when called by ::Bear on the use-line. 
 #~ # So no ISA relationship is set, ::Bear does not inherit new(), 
 #~ #   and use-line args are discarded.
 #~ {
-#~     package Acme::Teddy::Bear;
-#~     use Acme::Teddy qw| foo bar baz |;
+#~     package Module::Empty::Bear;
+#~     use Module::Empty qw| foo bar baz |;
 #~ }
 #~ pass( $check );
 #~ 
 #~ $check          = 'new in wrongly import/subclass';
 #~ eval {
-#~     my $self        = Acme::Teddy::Bear->new;
+#~     my $self        = Module::Empty::Bear->new;
 #~ };
 #~ $eval_err       = $@;
 #~ $want           = qr/Can't locate object method/;
@@ -43,7 +43,7 @@ ok( ! $eval_err, $check );
 $check          = 'rightly import';
 #
 BEGIN {
-    package Acme::Teddy;
+    package Module::Empty;
     sub import {
         ### @_
         shift;
@@ -52,17 +52,17 @@ BEGIN {
         no strict 'refs';
         push @{"${caller}::$imsym"}, @_;
         ### @_
-        ### @Acme::Teddy::Cub::IMPORTS
+        ### @Module::Empty::Cub::IMPORTS
     };
 }
 BEGIN {
-    package Acme::Teddy::Cub;
-    use Acme::Teddy qw| foo bar baz |;
+    package Module::Empty::Cub;
+    use Module::Empty qw| foo bar baz |;
 }
 pass( $check );
 
 $check          = 'rightly import show imports';
-$have           = \@Acme::Teddy::Cub::IMPORTS;
+$have           = \@Module::Empty::Cub::IMPORTS;
 $want           = [qw| foo bar baz |];
 is_deeply( $have, $want, $check );
 
@@ -80,7 +80,7 @@ $have           = $self->isa('Class::Lite');
 ok( $have, $check );
 
 $check          = 'isa bridge';
-$have           = $self->isa('Class::Lite::Acme::Teddy');
+$have           = $self->isa('Class::Lite::Module::Empty');
 ok( $have, $check );
 
 # Access

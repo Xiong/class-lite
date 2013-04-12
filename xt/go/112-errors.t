@@ -9,7 +9,7 @@ my $check       ;
 
 # Construction
 eval q{
-    package Acme::Teddy;
+    package Module::Empty;
     use Class::Lite qw| attr1 ho-ge attr3 |;
 };
 
@@ -20,7 +20,7 @@ like( $eval_err, $want, $check );
 note($eval_err);
 
 eval q{
-    package Acme::Teddy::Bear;
+    package Module::Empty::Bear;
     use Class::Lite ( 'attr1', '', 'attr3' );
 };
 
@@ -31,7 +31,7 @@ like( $eval_err, $want, $check );
 note($eval_err);
 
 eval q{
-    package Acme::Teddy::Bird;
+    package Module::Empty::Bird;
     my $wing    = [];
     use Class::Lite ( 'attr1', $wing, 'attr3' );
 };
@@ -43,7 +43,7 @@ like( $eval_err, $want, $check );
 note($eval_err);
 
 eval q{
-    package Acme::Teddy::Toad;
+    package Module::Empty::Toad;
     my $legs    = 'string';
     use Class::Lite ( 'attr1', $legs, 'attr3' );
 };

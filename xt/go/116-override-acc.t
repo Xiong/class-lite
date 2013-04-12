@@ -9,7 +9,7 @@ my $check       ;
 
 # Construction
 eval {
-    package Acme::Teddy;
+    package Module::Empty;
     use Class::Lite qw| attr1 attr2 attr3 |;
 };
 
@@ -19,13 +19,13 @@ $check          = $eval_err ? $eval_err : 'use ok';
 ok( ! $eval_err, $check );
 
 $check          = 'new';
-my $self        = Acme::Teddy->new;
+my $self        = Module::Empty->new;
 $have           = ref $self;
-$want           = 'Acme::Teddy';
+$want           = 'Module::Empty';
 is( $have, $want, $check );
 
 {
-    package Acme::Teddy;
+    package Module::Empty;
     sub put_attr2 { $self->{attr2} = 'OVERRIDE' };
 }
 
