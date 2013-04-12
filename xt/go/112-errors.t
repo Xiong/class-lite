@@ -7,6 +7,8 @@ my $have        ;
 my $want        ;
 my $check       ;
 
+note('This script emits several errors intentionally; this is ok.');
+
 # Construction
 eval q{
     package Module::Empty;

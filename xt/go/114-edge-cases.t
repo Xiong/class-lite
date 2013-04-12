@@ -2,7 +2,7 @@ use strict;
 use warnings;
 use Test::More;
 
-use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
+#~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 my $eval_err    ;
 my $have        ;
@@ -21,24 +21,24 @@ $eval_err       = $@;
 $check          = $eval_err ? $eval_err : 'use ok';
 ok( ! $eval_err, $check );
 
-#~ $check          = 'wrongly import/subclass';
-#~ # Module::Empty inherited import() but that method short-circuits 
-#~ #   when called by ::Bear on the use-line. 
-#~ # So no ISA relationship is set, ::Bear does not inherit new(), 
-#~ #   and use-line args are discarded.
-#~ {
-#~     package Module::Empty::Bear;
-#~     use Module::Empty qw| foo bar baz |;
-#~ }
-#~ pass( $check );
-#~ 
-#~ $check          = 'new in wrongly import/subclass';
-#~ eval {
-#~     my $self        = Module::Empty::Bear->new;
-#~ };
-#~ $eval_err       = $@;
-#~ $want           = qr/Can't locate object method/;
-#~ like( $eval_err, $want, $check );
+$check          = 'wrongly import/subclass';
+# Module::Empty inherited import() but that method short-circuits 
+#   when called by ::Bear on the use-line. 
+# So no ISA relationship is set, ::Bear does not inherit new(), 
+#   and use-line args are discarded.
+{
+    package Module::Empty::Bear;
+    use Module::Empty qw| foo bar baz |;
+}
+pass( $check );
+
+$check          = 'new in wrongly import/subclass';
+eval {
+    my $self        = Module::Empty::Bear->new;
+};
+$eval_err       = $@;
+$want           = qr/Can't locate object method/;
+like( $eval_err, $want, $check );
 
 $check          = 'rightly import';
 #
