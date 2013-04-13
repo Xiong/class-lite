@@ -12,7 +12,7 @@ use warnings;
 use version; our $VERSION = qv('v0.0.1');
 
 # Alternate uses
-use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
+#~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
 #============================================================================#
