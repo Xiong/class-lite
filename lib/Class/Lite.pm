@@ -53,7 +53,6 @@ sub init {
 sub import {
     no warnings 'uninitialized';
     my $class       = shift;
-#~     return unless shift eq q{Class::Lite};
     my $caller      = caller;
     my $bridge      = qq{Class::Lite::$caller};
     ### $class
@@ -76,6 +75,9 @@ sub import {
             . qq* sub put_$_ { \$_[0]->{$_} = \$_[1]; return \$_[0] };  *
         } @args,
     ;
+    # <xiong> I cannot figure out a way to make this eval fail.
+    #           When you find out, please let me know. 
+    # uncoverable branch true
     die "Failed to generate $bridge: $@" if $@;
     
     # Make caller inherit from bridge.
@@ -84,6 +86,7 @@ sub import {
         qq* our  \@ISA;                                                 *,
         qq* push \@ISA, '$bridge';                                      *,
     ;
+    # This second eval fails in case recursive inheritance is attempted.
     die "Failed to generate $caller: $@" if $@;
     
     # In case caller must get the last word.
