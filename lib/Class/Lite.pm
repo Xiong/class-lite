@@ -9,7 +9,7 @@ package Class::Lite;
 #~ use 5.016002;   # 5.16.2    # 2012  # __SUB__
 use strict;
 use warnings;
-use version; our $VERSION = qv('v0.0.1');
+use version; our $VERSION = qv('v0.1.0');
 
 # Alternate uses
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
@@ -53,7 +53,6 @@ sub init {
 sub import {
     no warnings 'uninitialized';
     my $class       = shift;
-#~     return unless shift eq q{Class::Lite};
     my $caller      = caller;
     my $bridge      = qq{Class::Lite::$caller};
     ### $class
@@ -76,6 +75,9 @@ sub import {
             . qq* sub put_$_ { \$_[0]->{$_} = \$_[1]; return \$_[0] };  *
         } @args,
     ;
+    # <xiong> I cannot figure out a way to make this eval fail.
+    #           When you find out, please let me know. 
+    # uncoverable branch true
     die "Failed to generate $bridge: $@" if $@;
     
     # Make caller inherit from bridge.
@@ -84,6 +86,7 @@ sub import {
         qq* our  \@ISA;                                                 *,
         qq* push \@ISA, '$bridge';                                      *,
     ;
+    # This second eval fails in case recursive inheritance is attempted.
     die "Failed to generate $caller: $@" if $@;
     
     # In case caller must get the last word.
@@ -107,7 +110,7 @@ Class::Lite - Simple base class with get/put accessors
 
 =head1 VERSION
 
-This document describes Class::Lite version v0.0.1
+This document describes Class::Lite version v0.1.0
 
 =head1 SYNOPSIS
 
@@ -186,6 +189,8 @@ Makes C<< Class::Lite >> a base class for Toy::Class. If arguments are
 given then simple get and put accessors will be created in caller's 
 namespace for each argument. The accessors do no validation. 
 
+B<< This is probably all you need to know. >> Read on if you intend to do tricky stuff in a superclass. 
+
 =head1 INHERITED METHODS 
 
 =head2 import()
@@ -213,7 +218,7 @@ impunity. If you want to have your cake and eat it, too, beware:
 
 This will not work as you expect! C<< SUPER::import() >> will think Big is 
 its C<< caller() >>, which is true. So instead of making Big a parent of 
-Tot and defining accessors for Tot; C<< SUPER::import() will attempt to 
+Tot and defining accessors for Tot; C<< SUPER::import() >> will attempt to 
 make Big a parent of itself... at which point the fatal error relieves us 
 of further worry. 
 
@@ -251,7 +256,7 @@ discarded.
 
 The default method does nothing and merely returns its arguments. 
 
-NOTE that neither of these methods must be employed if all you want to do is completely override C<< Class::Lite::import() >> in your class. 
+NOTE that neither of these methods must be employed if all you want to do in your class is override C<< Class::Lite::import() >> completely. 
 
 =head2 new()
 
@@ -287,19 +292,24 @@ Even at compile-time there are questions raised when your class inherits from bo
     use Class::Lite qw| foo bar baz |;              # make get/put accessors
     use parent 'Big::Fat::Super';
 
-If the other superclass is pedestrian and just defines methods for you to inherit then there's little likelihood of interaction. If the other superclass is also trying to define methods with the same names as generated accessors then who can say? So don't do that. 
+If the other superclass is pedestrian and just defines methods for you to 
+inherit then there's little likelihood of interaction. If the other 
+superclass is also trying to define methods with the same names as 
+generated accessors then who can say? So don't do that. 
 
 Diamond inheritance is a special case: 
 
     package My::Big;
-    use Class::Lite qw| big1 big2 |;
-    sub get_tot1 { 'do something utterly unpredictable'             };
+    use Class::Lite qw| big1 big2 big3 |;
     
     package My::Tot;
     # I want to inherit from My::Big but I also want Class::Lite's acc's.
-    use Class::Lite qw| tot1 tot2 |;
+    use My::Big;
+    use Class::Lite qw| big3 tot1 tot2 |;
 
-TODO: WHAT WILL HAPPEN?
+This works, regardless of which superclass is use'd first, even if the 
+accessor lists overlap. If the My::Big superclass does funny stuff, though, 
+all bets are off. Anybody with a use case is welcome to open an issue. 
 
 =head1 SEE ALSO
 
@@ -327,8 +337,11 @@ This error will attempt to display the offending argument but may not succeed.
 
 Something evil happened while doing the heavy lifting: getting into your 
 package, getting into the bridge package, setting up the ISA 
-relationships, or defining requested accessors. This should never happen 
-and isn't your fault. Please make a bug report. 
+relationships, or defining requested accessors. This should not happen and 
+isn't your fault (unless you've tried to inherit recursively). Please make 
+a bug report. 
+
+=begin for_later
 
 =item C<< some error message >>
 
@@ -337,6 +350,8 @@ Some explanation.
 =item C<< some error message >>
 
 Some explanation. 
+
+=end for_later
 
 =back
 

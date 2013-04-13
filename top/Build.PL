@@ -14,7 +14,6 @@ my $builder = Module::Build->new(
     requires            => {
         'perl'                      => 5.008008,
         'version'                   => 0.99,
-        'overload'                  => 0,
 #~         ''  => 0,
     },
     recommends          => {
@@ -32,7 +31,7 @@ my $builder = Module::Build->new(
             devel       development 
             
             OO  object-oriented class object method
-            constructor accessor accessors
+            base constructor accessor accessors
             
             lite lightweight tiny
         ) ],
