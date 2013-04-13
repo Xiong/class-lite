@@ -9,7 +9,7 @@ package Class::Lite;
 #~ use 5.016002;   # 5.16.2    # 2012  # __SUB__
 use strict;
 use warnings;
-use version; our $VERSION = qv('v0.0.1');
+use version; our $VERSION = qv('v0.1.0');
 
 # Alternate uses
 #~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
@@ -107,7 +107,7 @@ Class::Lite - Simple base class with get/put accessors
 
 =head1 VERSION
 
-This document describes Class::Lite version v0.0.1
+This document describes Class::Lite version v0.1.0
 
 =head1 SYNOPSIS
 
