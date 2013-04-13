@@ -40,7 +40,7 @@ sub init {
     return shift;
 }; ## init
 
-#=========# EXTERNAL FUNCTION
+#=========# CLASS METHOD
 #~ use Class::Lite qw| attr1 attr2 attr3 |;
 #~ use Class::Lite qw|             # Simple base class with get/put accessors
 #~     attr1
@@ -60,8 +60,9 @@ sub import {
     ### $bridge
     ### $caller
     
-    my $upcaller    = scalar caller(1);
-    ### $upcaller
+    # In case caller is eager.
+    my @args        = $class->fore_import(@_);
+    ### @args
     
     # Do most work in the bridge class.    
     eval join qq{\n},
@@ -73,7 +74,7 @@ sub import {
                 or die "Invalid accessor name '$_'";
               qq* sub get_$_ { return \$_[0]->{$_} };                   *
             . qq* sub put_$_ { \$_[0]->{$_} = \$_[1]; return \$_[0] };  *
-        } @_,
+        } @args,
     ;
     die "Failed to generate $bridge: $@" if $@;
     
@@ -85,8 +86,15 @@ sub import {
     ;
     die "Failed to generate $caller: $@" if $@;
     
+    # In case caller must get the last word.
+    $class->rear_import(@_);
+    
     return 1;    
 }; ## import
+
+# Dummy methods do nothing.
+sub fore_import { shift; return @_ };
+sub rear_import { shift; return @_ };
 
 ## END MODULE
 1;
@@ -216,15 +224,15 @@ of further worry.
         my $class       = shift;
         my $args        = shift;
         my $hoge        =    $args->{hoge}      // 'default'     ;
-        my $accessors   = @{ $args->{accessors} // []           };
+        my @accessors   = @{ $args->{accessors} // []           };
         _do_hoge{$hoge};
-        return @$accessors;
+        return @accessors;
     };
     
     package Tot;
     use Big {
         hoge        => 'piyo',
-        accessors   => qw| chim chum choo |,
+        accessors   => [qw| chim chum choo |],
     };
 
 To solve the difficulty previously mentioned: Leave C<< import() >> 

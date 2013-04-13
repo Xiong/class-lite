@@ -3,10 +3,18 @@
 ### $bridge: 'Class::Lite::Module::Empty'
 ### $caller: 'Module::Empty'
 
-### $upcaller: 'main'
+### @args: [
+###          'attr1',
+###          'attr2',
+###          'attr3'
+###        ]
 
 ### $class: 'Module::Empty'
 ### $bridge: 'Class::Lite::Module::Empty::Cub'
 ### $caller: 'Module::Empty::Cub'
 
-### $upcaller: 'main'
+### @args: [
+###          'chim',
+###          'chum',
+###          'choo'
+###        ]

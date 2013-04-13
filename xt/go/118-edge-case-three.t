@@ -29,16 +29,16 @@ BEGIN {
         my $class       = shift;
         my $args        = shift;
         my $hoge        =    $args->{hoge}      // 'default'     ;
-        my $accessors   = @{ $args->{accessors} // []           };
+        my @accessors   = @{ $args->{accessors} // []           };
         # _do_hoge{$hoge};
-        return @$accessors;
+        return @accessors;
     };
 }
 BEGIN {
     package Module::Empty::Cub;
     use Module::Empty {
         hoge        => 'piyo',
-        accessors   => qw| chim chum choo |,
+        accessors   => [qw| chim chum choo |],
     };
 }
 pass( $check );
