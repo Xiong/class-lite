@@ -12,7 +12,7 @@ use warnings;
 use version; our $VERSION = qv('v0.0.1');
 
 # Alternate uses
-#~ use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
+use Devel::Comments '###', ({ -file => 'debug.log' });                   #~
 
 ## use
 #============================================================================#
@@ -52,15 +52,22 @@ sub init {
 #   
 sub import {
     no warnings 'uninitialized';
-    return unless shift eq q{Class::Lite};
+    my $class       = shift;
+#~     return unless shift eq q{Class::Lite};
     my $caller      = caller;
     my $bridge      = qq{Class::Lite::$caller};
+    ### $class
+    ### $bridge
+    ### $caller
+    
+    my $upcaller    = scalar caller(1);
+    ### $upcaller
     
     # Do most work in the bridge class.    
     eval join qq{\n},
         qq* package $bridge;                                            *,
         qq* our  \@ISA;                                                 *,
-        qq* push \@ISA, 'Class::Lite';                                  *,
+        qq* push \@ISA, '$class';                                       *,
         map {
             defined and ! ref and /^[^\W\d]\w*\z/s
                 or die "Invalid accessor name '$_'";
@@ -183,25 +190,60 @@ your further subclasses can also take advantage of C<< Class::Lite >>
 features. 
 
 Since this is merely inherited you may define your own C<< import() >> with 
-impunity. If you want to have your cake and eat it, too, declare your 
-use-line API as a hashref: 
+impunity. If you want to have your cake and eat it, too, beware: 
 
-    use My::Class({
-        hoge        => 'piyo',
-        accessors   => qw| chim chum choo |;
-    });
-
-Then in your class: 
-
+    package Big;
     sub import {
+        my $class       = shift;
+        # Do specific stuff...
+        $class->SUPER::import(@_);
+        return 1;
+    };
+    
+    package Tot;
+    use Big (@args);
+
+This will not work as you expect! C<< SUPER::import() >> will think Big is 
+its C<< caller() >>, which is true. So instead of making Big a parent of 
+Tot and defining accessors for Tot; C<< SUPER::import() will attempt to 
+make Big a parent of itself... at which point the fatal error relieves us 
+of further worry. 
+
+=head2 fore_import()
+
+    package Big;
+    sub fore_import {
         my $class       = shift;
         my $args        = shift;
         my $hoge        =    $args->{hoge}      // 'default'     ;
         my $accessors   = @{ $args->{accessors} // []           };
         _do_hoge{$hoge};
-        $class->SUPER::import($accessors);
-        return 1;
+        return @$accessors;
     };
+    
+    package Tot;
+    use Big {
+        hoge        => 'piyo',
+        accessors   => qw| chim chum choo |,
+    };
+
+To solve the difficulty previously mentioned: Leave C<< import() >> 
+untouched and do whatever you like to the use-line argument list in a 
+redefined C<< fore_import() >>. Just be sure to return a flat list of 
+arguments so C<< import() >> can do its work. 
+
+The default method does nothing and merely returns its arguments. 
+
+=head2 rear_import()
+
+If you just have to get the last word, redefine C<< rear_import() >> 
+instead, or also. You'll be passed all the use-line arguments, not just 
+what C<< fore_import() >> returned; and your return value will be 
+discarded. 
+
+The default method does nothing and merely returns its arguments. 
+
+NOTE that neither of these methods must be employed if all you want to do is completely override C<< Class::Lite::import() >> in your class. 
 
 =head2 new()
 
